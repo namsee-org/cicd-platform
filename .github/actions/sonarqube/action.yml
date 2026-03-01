@@ -1,0 +1,57 @@
+name: "SonarCloud Scan"
+description: "Auto-creates SonarCloud project and runs static analysis"
+
+inputs:
+  sonar-token:
+    description: "SonarCloud authentication token"
+    required: true
+  sonar-organization:
+    description: "SonarCloud organization key"
+    required: true
+    default: "namsee-org"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Recommended for SonarCloud to blame code properly
+
+    - name: Extract repo name and prepare variables
+      shell: bash
+      run: |
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        # SonarCloud project keys typically shouldn't have ::, using _ is safer
+        PROJECT_KEY="${{ inputs.sonar-organization }}_${REPO_NAME}"
+        echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_ENV
+        echo "PROJECT_KEY=${PROJECT_KEY}" >> $GITHUB_ENV
+
+    - name: Auto-create SonarCloud project
+      shell: bash
+      run: |
+        echo "Attempting to create SonarCloud project: ${PROJECT_KEY}"
+        # Creates project. Returns 400 if it already exists, which we allow.
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ inputs.sonar-token }}:" \
+          -X POST "https://sonarcloud.io/api/projects/create?organization=${{ inputs.sonar-organization }}&project=${PROJECT_KEY}&name=${REPO_NAME}")
+        
+        if [ "$RESPONSE" -eq 200 ]; then
+          echo "Project successfully created."
+        elif [ "$RESPONSE" -eq 400 ]; then
+          echo "Project already exists (or bad request). Proceeding with scan..."
+        else
+          echo "Unexpected HTTP status: $RESPONSE. The scan might fail if the project doesn't exist."
+        fi
+
+    - name: Run SonarCloud scan
+      shell: bash
+      env:
+        SONAR_SCANNER_HOME: /opt/sonar-scanner
+        SONAR_USER_HOME: /opt/sonar-scanner/.sonar
+      run: |
+        sonar-scanner \
+          -Dsonar.organization=${{ inputs.sonar-organization }} \
+          -Dsonar.projectName=${REPO_NAME} \
+          -Dsonar.projectKey=${PROJECT_KEY} \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.token=${{ inputs.sonar-token }}

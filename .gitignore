@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Git
+.git/
+
+# Python
+__pycache__/
+.ruff_cache/
+.mypy_cache/
+venv/
+.venv/
+
+# Coverage reports
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+*.tmp
+
+# OS
+.DS_Store
