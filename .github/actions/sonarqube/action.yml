@@ -44,11 +44,11 @@ runs:
         fi
 
     - name: Run SonarCloud scan
-      shell: bash
-      run: |
-        sonar-scanner \
-          -Dsonar.organization=${{ inputs.sonar-organization }} \
-          -Dsonar.projectName=${REPO_NAME} \
-          -Dsonar.projectKey=${PROJECT_KEY} \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.token=${{ inputs.sonar-token }}
+      uses: SonarSource/sonarcloud-github-action@v5
+      with:
+        args: >
+          -Dsonar.organization=${{ inputs.sonar-organization }}
+          -Dsonar.projectName=${REPO_NAME}
+          -Dsonar.projectKey=${PROJECT_KEY}
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
