@@ -43,8 +43,8 @@ runs:
           echo "Unexpected HTTP status: $RESPONSE. The scan might fail if the project doesn't exist."
         fi
 
-    - name: Run SonarCloud scan
-      uses: SonarSource/sonarcloud-github-action@v5
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v6
       with:
         args: >
           -Dsonar.organization=${{ inputs.sonar-organization }}
