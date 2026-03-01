@@ -13,14 +13,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Recommended for SonarCloud to blame code properly
-
     - name: Extract repo name and prepare variables
       shell: bash
       run: |
+        echo "::add-mask::${{ inputs.sonar-token }}"
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
         # SonarCloud project keys typically shouldn't have ::, using _ is safer
         PROJECT_KEY="${{ inputs.sonar-organization }}_${REPO_NAME}"
