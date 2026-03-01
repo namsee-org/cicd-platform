@@ -45,9 +45,6 @@ runs:
 
     - name: Run SonarCloud scan
       shell: bash
-      env:
-        SONAR_SCANNER_HOME: /opt/sonar-scanner
-        SONAR_USER_HOME: /opt/sonar-scanner/.sonar
       run: |
         sonar-scanner \
           -Dsonar.organization=${{ inputs.sonar-organization }} \
